@@ -1,0 +1,7 @@
+[core]
+    remote = origin
+['remote "origin"']
+    url = https://dagshub.com/maheenkamran/VisionGuard-Deepfake-Detection.dvc
+    jobs = 1
+    read_timeout = 600
+    connect_timeout = 600
