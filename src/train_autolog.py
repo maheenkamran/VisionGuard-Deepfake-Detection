@@ -16,7 +16,6 @@ from sklearn.metrics import (accuracy_score, precision_score, recall_score, f1_s
                              RocCurveDisplay)
 import mlflow
 import mlflow.keras
-import mlflow.tensorflow
 
 from pipeline import make_ds, get_labels
 from models import (build_baseline, build_transfer, unfreeze_last_block,
@@ -60,12 +59,19 @@ def dvc_hash():
     return "unknown"
 
 
-def callbacks(ckpt, patience):
-    return [
+class Stage2Metrics(keras.callbacks.Callback):
+    """Metrics only (no params), used for stage 2 because autolog is off there."""
+    def on_epoch_end(self, epoch, logs=None):
+        mlflow.log_metrics({k: float(v) for k, v in (logs or {}).items()}, step=epoch)
+
+
+def callbacks(ckpt, patience, extra=None):
+    cbs = [
         keras.callbacks.EarlyStopping("val_loss", patience=patience, restore_best_weights=True),
         keras.callbacks.ModelCheckpoint(ckpt, monitor="val_loss", save_best_only=True),
         keras.callbacks.ReduceLROnPlateau("val_loss", factor=0.5, patience=2, min_lr=1e-7),
     ]
+    return cbs + (extra or [])
 
 
 def main():
@@ -78,20 +84,17 @@ def main():
     os.makedirs(out_dir, exist_ok=True)
 
     uri = os.getenv("MLFLOW_TRACKING_URI", "")
+    if not uri.startswith("https://dagshub.com"):
+        raise SystemExit("MLFLOW_TRACKING_URI is not set to DagsHub.")
     mlflow.set_tracking_uri(uri)
     mlflow.set_experiment(a.experiment)
 
-    try:
-        mlflow.keras.autolog(log_models=False)
-        print("Using mlflow.keras.autolog")
-    except Exception as e:
-        print("keras autolog unavailable, using tensorflow autolog:", e)
-        mlflow.tensorflow.autolog(log_models=False)
+    mlflow.keras.autolog(log_models=False, log_datasets=False)
 
     patience = 8 if a.backbone == "cnn" else 4
     pre = get_preprocess(a.backbone)
     train_ds = make_ds(f"{a.splits}/train.csv", True, a.batch, pre, a.img,
-                       True if a.aug else False, a.max_samples, a.seed)
+                       bool(a.aug), a.max_samples, a.seed)
     val_ds = make_ds(f"{a.splits}/val.csv", False, a.batch, pre, a.img,
                      max_samples=a.max_samples, seed=a.seed)
     test_ds = make_ds(f"{a.splits}/test.csv", False, a.batch, pre, a.img,
@@ -99,7 +102,6 @@ def main():
 
     t0 = time.time()
     with mlflow.start_run(run_name=a.run_name):
-        
         skip = {"epochs", "batch"}
         mlflow.log_params({k: v for k, v in vars(a).items() if k not in skip})
         mlflow.set_tags({"git_commit": git_commit(), "dvc_data_version": dvc_hash(),
@@ -124,15 +126,15 @@ def main():
         n1 = len(h1.history["loss"])
 
         if base is not None and a.ft_epochs > 0:
+            mlflow.keras.autolog(disable=True)
             unfreeze_last_block(base, a.backbone, a.ft_lr)
-            compile_model(model, a.ft_lr)            
+            compile_model(model, a.ft_lr)
             trainable_log["stage2"] = trainable_names(model)
             print("Stage 2 trainable layers:", trainable_log["stage2"])
             stage2_ckpt = f"models/{a.run_name}_stage2.keras"
-            
             h2 = model.fit(train_ds, validation_data=val_ds,
                            initial_epoch=n1, epochs=n1 + a.ft_epochs,
-                           callbacks=callbacks(stage2_ckpt, patience))
+                           callbacks=callbacks(stage2_ckpt, patience, [Stage2Metrics()]))
             histories.append(h2.history)
             if min(h2.history["val_loss"]) < best1:
                 final_ckpt = stage2_ckpt
