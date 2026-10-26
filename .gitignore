@@ -10,3 +10,4 @@ requirements_run.txt
 .dvc/config.local
 kt_toy/
 kt_vg/
+mlartifacts/

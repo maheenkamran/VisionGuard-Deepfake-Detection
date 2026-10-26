@@ -6,12 +6,10 @@ import matplotlib.pyplot as plt
 from tensorflow import keras
 from tensorflow.keras import layers
 
-# Load a small part of MNIST
 (x, y), _ = keras.datasets.mnist.load_data()
 x = x[:10000] / 255.0
 y = y[:10000]
 
-# Connect to the local MLflow server
 mlflow.set_tracking_uri("http://127.0.0.1:5000/")
 mlflow.set_experiment("toy_mnist")
 
@@ -32,19 +30,16 @@ for lr in [0.01, 0.0001]:
         history = model.fit(x, y, epochs=5, validation_split=0.2, verbose=0)
         acc = history.history["val_accuracy"][-1]
 
-        # Log parameters and metric
         mlflow.log_param("lr", lr)
         mlflow.log_param("epochs", 5)
         mlflow.log_metric("val_accuracy", acc)
 
-        # Log plot as artifact
         plt.plot(history.history["val_accuracy"])
         plt.title(f"val acc, lr={lr}")
         plt.savefig("curve.png")
         plt.close()
         mlflow.log_artifact("curve.png")
 
-        # Log model
         mlflow.keras.log_model(model, name="model")
 
         print("lr", lr, "val accuracy", acc)
