@@ -84,7 +84,7 @@ def callbacks(ckpt, use_mlflow, manual_log, offset, patience=4):
 
 def main():
     a = parse()
-    load_dotenv()                                   # no-op on Kaggle (secrets set as env vars)
+    load_dotenv()                                   
     keras.utils.set_random_seed(a.seed)
     os.environ["PYTHONHASHSEED"] = str(a.seed)
     os.makedirs("models", exist_ok=True)
@@ -134,7 +134,7 @@ def main():
 
         if base is not None and a.ft_epochs > 0:
             unfreeze_last_block(base, a.backbone, a.ft_lr)
-            compile_model(model, a.ft_lr)           # recompile is mandatory
+            compile_model(model, a.ft_lr)           
             trainable_log["stage2"] = trainable_names(model)
             print("Stage 2 trainable layers:", trainable_log["stage2"])
             stage2_ckpt = f"models/{a.run_name}_stage2.keras"
@@ -189,10 +189,9 @@ def main():
             RocCurveDisplay.from_predictions(yt, pt, ax=roc_ax)
         roc_fig.savefig(f"{out_dir}/roc_curve.png", dpi=120, bbox_inches="tight")
 
-        np.save(f"{out_dir}/test_probs.npy", pt)     # for error analysis (2.6)
+        np.save(f"{out_dir}/test_probs.npy", pt)     
         model.save(f"models/{a.run_name}.keras")
 
-        # ---------------- MLflow artifacts (3.4) ----------------
         if use_mlflow:
             mlflow.log_metrics(metrics)
             mlflow.log_dict(trainable_log, "trainable_layers.json")
