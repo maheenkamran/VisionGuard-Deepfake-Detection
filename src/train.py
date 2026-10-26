@@ -71,9 +71,9 @@ class MLflowEpochLogger(keras.callbacks.Callback):
                            step=self.offset + epoch)
 
 
-def callbacks(ckpt, use_mlflow, manual_log, offset):
+def callbacks(ckpt, use_mlflow, manual_log, offset, patience=4):
     cbs = [
-        keras.callbacks.EarlyStopping("val_loss", patience=4, restore_best_weights=True),
+        keras.callbacks.EarlyStopping("val_loss", patience=patience, restore_best_weights=True),
         keras.callbacks.ModelCheckpoint(ckpt, monitor="val_loss", save_best_only=True),
         keras.callbacks.ReduceLROnPlateau("val_loss", factor=0.5, patience=2, min_lr=1e-7),
     ]
@@ -92,6 +92,8 @@ def main():
     os.makedirs(out_dir, exist_ok=True)
 
     use_mlflow = bool(a.mlflow)
+    patience = 8 if a.backbone == "cnn" else 4
+    
     if use_mlflow:
         mlflow.set_experiment(a.experiment)
         if a.autolog:
@@ -125,7 +127,7 @@ def main():
         trainable_log["stage1"] = trainable_names(model)
         print("Stage 1 trainable layers:", trainable_log["stage1"])
         h1 = model.fit(train_ds, validation_data=val_ds, epochs=a.epochs,
-                       callbacks=callbacks(stage1_ckpt, use_mlflow, manual, 0))
+                       callbacks=callbacks(stage1_ckpt, use_mlflow, manual, 0, patience))
         histories.append(h1.history)
         best1 = min(h1.history["val_loss"])
         final_ckpt = stage1_ckpt
@@ -137,8 +139,7 @@ def main():
             print("Stage 2 trainable layers:", trainable_log["stage2"])
             stage2_ckpt = f"models/{a.run_name}_stage2.keras"
             h2 = model.fit(train_ds, validation_data=val_ds, epochs=a.ft_epochs,
-                           callbacks=callbacks(stage2_ckpt, use_mlflow, manual,
-                                               len(h1.history["loss"])))
+                           callbacks=callbacks(stage2_ckpt, use_mlflow, manual, len(h1.history["loss"]), patience))
             histories.append(h2.history)
             if min(h2.history["val_loss"]) < best1:
                 final_ckpt = stage2_ckpt

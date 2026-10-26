@@ -27,13 +27,13 @@ def build_baseline(img=224, dropout=0.4, lr=1e-3):
         L.Input((img, img, 3)),
         L.Rescaling(1 / 255.0),
         L.Conv2D(32, 3, padding="same", activation="relu"),
-        L.BatchNormalization(),
+        L.BatchNormalization(momentum=0.9),
         L.MaxPooling2D(),
         L.Conv2D(64, 3, padding="same", activation="relu"),
-        L.BatchNormalization(),
+        L.BatchNormalization(momentum=0.9),
         L.MaxPooling2D(),
         L.Conv2D(128, 3, padding="same", activation="relu"),
-        L.BatchNormalization(),
+        L.BatchNormalization(momentum=0.9),
         L.MaxPooling2D(),
         L.GlobalAveragePooling2D(),
         L.Dropout(dropout),
@@ -42,7 +42,6 @@ def build_baseline(img=224, dropout=0.4, lr=1e-3):
     ], name="baseline_cnn")
     compile_model(model, lr)
     return model
-
 
 def _backbone(name, img):
     cls = {"mobilenetv2": keras.applications.MobileNetV2,
