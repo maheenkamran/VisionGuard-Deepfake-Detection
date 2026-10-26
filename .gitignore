@@ -1,5 +1,10 @@
 .env
-data/
-__pycache__/
 .venv/
-*.keras
+__pycache__/
+data/
+models/
+mlflow.db
+mlruns/
+reports/smoke*/
+requirements_run.txt
+.dvc/config.local

@@ -19,7 +19,9 @@ for cls in sorted(os.listdir(ROOT)):
     for dirpath, _, files in os.walk(cdir):
         for fn in files:
             p = os.path.join(dirpath, fn)
-            row = dict(path=p, cls=cls, size_bytes=os.path.getsize(p),
+            row = dict(path=p, 
+                       rel_path=os.path.relpath(p, ROOT).replace("\\", "/"),  
+                       cls=cls, size_bytes=os.path.getsize(p),
                        sha256=sha256(p), width=None, height=None,
                        mode=None, format=None, corrupt=False)
             try:
