@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Result</h1>
+<p class="file">File: {{ filename }}</p>
+<div class="verdict {{ 'real' if label == 'Real' else 'ai' }}">{{ label }}</div>
+<p>Confidence: <strong>{{ "%.1f"|format(conf) }}%</strong></p>
+<div class="bar" data-conf="{{ conf }}">
+    <div id="fill"></div>
+</div>
+<script>
+    const bar = document.querySelector(".bar");
+    document.getElementById("fill").style.width = bar.dataset.conf + "%";
+</script>
+
+<p class="caveat">This is a probabilistic estimate, not proof. The model can be wrong,
+    especially on paintings, heavily edited or low-resolution images.</p>
+<a class="btn" href="{{ url_for('main.index') }}">Check another</a>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Is this image AI-generated or real?</h1>
+<p>Upload a JPG, PNG or WEBP image (max 5 MB).</p>
+<form method="post" action="/predict" enctype="multipart/form-data">
+    <input type="file" name="image" accept=".jpg,.jpeg,.png,.webp" required>
+    <button type="submit">Check image</button>
+</form>
+{% endblock %}
