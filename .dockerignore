@@ -1,0 +1,10 @@
+.venv
+.git
+.env
+data
+models
+mlruns
+reports
+instance
+__pycache__
+*.ipynb

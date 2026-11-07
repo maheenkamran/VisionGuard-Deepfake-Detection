@@ -1,0 +1,6 @@
+flask
+flask-sqlalchemy
+psycopg[binary]
+gunicorn
+pillow
+requests
