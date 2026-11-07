@@ -1,3 +1,5 @@
+[![ci](https://github.com/maheenkamran/VisionGuard-Deepfake-Detection/actions/workflows/ci.yml/badge.svg)](https://github.com/maheenkamran/VisionGuard-Deepfake-Detection/actions/workflows/ci.yml)
+
 # VisionGuard Deepfake Detection
 
 VisionGuard tells you whether an uploaded image is **AI-generated or real**.
