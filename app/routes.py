@@ -35,19 +35,19 @@ def predict():
     if not f or not f.filename:
         return error("No file selected.", 400)
 
-    name = secure_filename(f.filename)                      
+    name = secure_filename(f.filename)
     ext = name.rsplit(".", 1)[-1].lower() if "." in name else ""
     if ext not in cfg["ALLOWED_EXT"]:
         return error("Only JPG, PNG or WEBP images are allowed.", 415)
 
-    data = f.read()                                         
+    data = f.read()
     try:
-        Image.open(io.BytesIO(data)).verify()              
+        Image.open(io.BytesIO(data)).verify()
     except Exception:
         return error("This file is not a valid image.", 422)
 
     try:
-        if cfg["INFERENCE_MODE"] == "remote":               
+        if cfg["INFERENCE_MODE"] == "remote":
             r = requests.post(cfg["API_URL"] + "/predict",
                               files={"image": (name, data)},
                               headers={"X-API-Key": cfg["API_KEY"]}, timeout=30)
