@@ -6,7 +6,8 @@ VisionGuard tells you whether an uploaded image is **AI-generated or real**.
 It is an end-to-end MLOps project: data versioning, model training,
 experiment tracking, a web app, containerization, CI and cloud deployment.
 
-<!-- **Links:** [DagsHub project](https://dagshub.com/<user>/<RollNo>_A2_Ops) · [Live API](http://<ip>:8000/health) -->
+**Links:** [DagsHub project](https://dagshub.com/<user>/<RollNo>_A2_Ops) 
+[Live API](http://16.178.178.19:8000/health)
 
 ## Stack
 | Area | Tool |

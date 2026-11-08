@@ -1,0 +1,13 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports: [ "8000:8000" ]
+    environment:
+      MODEL_PATH: /srv/models/champion.keras
+      API_KEY: ${API_KEY}
+      THRESHOLD: "0.31"
+    volumes:
+      - ./models:/srv/models:ro
+    restart: unless-stopped

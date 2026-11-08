@@ -1,0 +1,12 @@
+FROM python:3.11-slim
+ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 TF_CPP_MIN_LOG_LEVEL=2
+WORKDIR /srv
+COPY requirements-api.txt .
+RUN pip install -r requirements-api.txt
+RUN useradd -m appuser
+COPY --chown=appuser:appuser api/server.py .
+USER appuser
+EXPOSE 8000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
+CMD ["gunicorn", "-b", "0.0.0.0:8000", "-w", "1", "--timeout", "120", "server:app"]
