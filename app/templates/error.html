@@ -1,6 +1,10 @@
 {% extends "base.html" %}
+{% block title %}Error · VisionGuard{% endblock %}
 {% block content %}
-<h1>Oops ({{ code }})</h1>
-<p class="err">{{ msg }}</p>
-<a class="btn" href="{{ url_for('main.index') }}">Back</a>
+<section class="error-page">
+    <div class="err-code grad">{{ code }}</div>
+    <h1>Something went wrong</h1>
+    <p class="err">{{ msg }}</p>
+    <a class="btn" href="{{ url_for('main.index') }}">Back to upload</a>
+</section>
 {% endblock %}

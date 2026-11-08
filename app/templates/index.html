@@ -1,9 +1,51 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Is this image AI-generated or real?</h1>
-<p>Upload a JPG, PNG or WEBP image (max 5 MB).</p>
-<form method="post" action="/predict" enctype="multipart/form-data">
-    <input type="file" name="image" accept=".jpg,.jpeg,.png,.webp" required>
-    <button type="submit">Check image</button>
+<section class="hero">
+    <span class="chip">Image forensics</span>
+    <h1>Is it <span class="grad">real</span>, or <span class="grad">generated</span>?</h1>
+    <p class="sub">Drop an image and VisionGuard estimates whether it was made by AI.</p>
+</section>
+
+<form id="upload-form" method="post" action="/predict" enctype="multipart/form-data">
+    <div class="card tilt" data-tilt>
+        <label id="dropzone" class="dropzone" for="file">
+            <input id="file" type="file" name="image" accept=".jpg,.jpeg,.png,.webp" required>
+            <div class="dz-empty">
+                <div class="dz-icon">
+                    <svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="currentColor"
+                        stroke-width="1.6">
+                        <path d="M12 16V4m0 0l-4 4m4-4l4 4" />
+                        <path d="M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" />
+                    </svg>
+                </div>
+                <strong>Drag and drop an image here</strong>
+                <span>or click to browse · JPG, PNG, WEBP · max 5 MB</span>
+            </div>
+            <div class="dz-preview">
+                <img id="preview" alt="Selected image preview">
+                <div class="scan"></div>
+                <div class="corner tl"></div>
+                <div class="corner tr"></div>
+                <div class="corner bl"></div>
+                <div class="corner br"></div>
+            </div>
+        </label>
+        <div id="file-info" class="file-info" hidden>
+            <span id="file-name"></span>
+            <span id="file-warn" class="warn" hidden></span>
+        </div>
+        <button id="submit-btn" class="btn big" type="submit">
+            <span class="btn-label">Analyze image</span>
+        </button>
+    </div>
 </form>
+
+<section class="features">
+    <div class="card mini-card" data-tilt><b>Transfer learning</b><span>Fine-tuned MobileNetV2 trained on real and AI
+            images.</span></div>
+    <div class="card mini-card" data-tilt><b>Private by design</b><span>Your upload is analysed in memory and never
+            saved to disk.</span></div>
+    <div class="card mini-card" data-tilt><b>Full audit trail</b><span>Every verdict is logged with time, model and
+            confidence.</span></div>
+</section>
 {% endblock %}

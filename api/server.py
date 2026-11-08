@@ -22,7 +22,12 @@ NAME = os.getenv("MODEL_NAME", "visionguard-mobilenetv2 (ft lr 1e-4)")
 def health():
     return jsonify(status="ok", model=NAME)
 
-
+@app.route("/")
+def home():
+    return jsonify(service="VisionGuard model API", status="ok",
+                   endpoints={"health": "GET /health",
+                              "predict": "POST /predict (header X-API-Key, form-data field 'image')"})
+    
 @app.route("/predict", methods=["POST"])
 def predict():
     if request.headers.get("X-API-Key") != KEY:
